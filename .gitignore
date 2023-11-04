@@ -1,0 +1,12 @@
+node_modules
+# Keep environment variables out of version control
+.env
+/dist
+/vue_dist
+prisma//*
+!prisma/seed.ts
+!prisma/schema.prisma
+uploads
+
+/public/*
+!/public/.gitkeep

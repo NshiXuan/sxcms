@@ -1,0 +1,56 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// 建表
+// 用户
+model User {
+  id        Int       @id @default(autoincrement()) // 主键自增
+  name      String
+  password  String
+  nickname  String? // 昵称
+  secret    String? // 密钥 用来判断这个用户是否有权限使用某些功能 pro版（会员）
+  email     String?
+  mobile    String?
+  avatar    String? // 头像 会给默认头像
+  createAt  DateTime  @default(now()) // 默认时间为当前时间
+  updatedAt DateTime  @updatedAt // 更新的时候自动设为当前时间
+  Comment   Comment[]
+}
+
+// 软件
+model Soft {
+  id          Int       @id @default(autoincrement())
+  title       String
+  content     String    @db.Text
+  description String // 简介
+  preview     String // 预览图片
+  is_free     Boolean   @default(true) // app是否免费 有些软件是免费的 有些是收费的
+  createAt    DateTime  @default(now())
+  updateAt    DateTime  @updatedAt
+  Comment     Comment[]
+}
+
+// 评论与回复都是同一张表 自连接
+model Comment {
+  id        Int       @id @default(autoincrement())
+  content   String
+  createAt  DateTime  @default(now())
+  updateAt  DateTime  @updatedAt
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade) //用户删除时 对应的评论也删除
+  userId    Int
+  soft      Soft      @relation(fields: [softId], references: [id], onDelete: Cascade)
+  softId    Int
+  // 回复
+  commentId Int? // 回复的是那个评论
+  reply     Comment?  @relation("replys", fields: [commentId], references: [id], onDelete: Cascade)
+  replys    Comment[] @relation("replys") // 评论的回复内容
+}
